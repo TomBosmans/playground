@@ -1,6 +1,15 @@
 services:
+  aws-lambda:
+    container_name: playground_aws-lambda
+    image: amazon/aws-lambda-nodejs:20
+    command: index.handler
+    volumes:
+      - ./aws-lambda:/var/task
+    ports:
+      - 9000:8080
+
   di-container:
-    container_name: di-container
+    container_name: playground_di-container
     stdin_open: true
     build:
       context: di-container
