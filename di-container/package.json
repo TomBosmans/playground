@@ -1,0 +1,14 @@
+{
+  "name": "di-container",
+  "type": "module",
+  "scripts": {
+    "test": "node --no-warnings --experimental-strip-types --test '**/*.spec.ts'",
+    "lint": "biome check .",
+    "tsc": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.6",
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3"
+  }
+}

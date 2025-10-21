@@ -1,0 +1,9 @@
+services:
+  di-container:
+    container_name: di-container
+    stdin_open: true
+    build:
+      context: di-container
+      dockerfile: Dockerfile
+    volumes:
+      - "./di-container:/di-container"
