@@ -10,5 +10,8 @@
     "@biomejs/biome": "^2.2.6",
     "@types/node": "^24.9.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "awilix": "^12.0.5"
   }
 }
