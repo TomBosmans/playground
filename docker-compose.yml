@@ -16,3 +16,12 @@ services:
       dockerfile: Dockerfile
     volumes:
       - "./di-container:/di-container"
+
+  repository:
+    container_name: playground_repository
+    stdin_open: true
+    build:
+      context: repository
+      dockerfile: Dockerfile
+    volumes:
+      - "./repository:/repository"
