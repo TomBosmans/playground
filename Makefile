@@ -1,3 +1,5 @@
+include .env
+
 start:
 	@docker compose start $(service)
 
@@ -32,3 +34,5 @@ shell:
 		docker compose run --rm --no-deps $(service) sh; \
 	}
 
+browse:
+	firefox http://localhost:$($(shell echo ${service}_PORT | tr '[:lower:]' '[:upper:]'))

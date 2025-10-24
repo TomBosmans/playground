@@ -1,15 +1,15 @@
 services:
   aws-lambda:
-    container_name: playground_aws-lambda
+    container_name: ${APP_NAME}_aws-lambda
     image: amazon/aws-lambda-nodejs:20
     command: index.handler
     volumes:
       - ./aws-lambda:/var/task
     ports:
-      - 9000:8080
+      - ${AWS_LAMBDA_PORT}:8080
 
   di-container:
-    container_name: playground_di-container
+    container_name: ${APP_NAME}_di-container
     stdin_open: true
     build:
       context: di-container
@@ -18,10 +18,30 @@ services:
       - "./di-container:/di-container"
 
   repository:
-    container_name: playground_repository
+    container_name: ${APP_NAME}_repository
     stdin_open: true
     build:
       context: repository
       dockerfile: Dockerfile
     volumes:
       - "./repository:/repository"
+
+  mailer:
+    container_name: ${APP_NAME}_mailer
+    stdin_open: true
+    env_file:
+      - .env
+    ports:
+      - ${REACT_EMAIL_PORT}:3000
+    build:
+      context: mailer
+      dockerfile: Dockerfile
+    volumes:
+      - "./mailer:/mailer"
+
+  mailpit:
+    container_name: ${APP_NAME}_mailpit
+    image: axllent/mailpit
+    ports:
+      - "${MAILPIT_PORT}:8025"
+      - "${MAILPIT_SMTP_PORT}:1025"
