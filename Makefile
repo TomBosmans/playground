@@ -22,9 +22,6 @@ log:
 		docker compose logs -f --tail 10000 --no-log-prefix $(service); \
 	fi
 
-build:
-	@docker compose build
-
 status:
 	@docker compose ps -a --format "{{.Label \"com.docker.compose.service\"}}|{{.Status}}" $(service) | column -t -s "|"; \
 

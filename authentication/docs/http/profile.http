@@ -1,0 +1,1 @@
+GET {{BACKEND_URL}}:{{BACKEND_PORT}}/profile

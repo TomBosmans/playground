@@ -39,6 +39,19 @@ services:
     volumes:
       - "./mailer:/mailer"
 
+  authentication:
+    container_name: ${APP_NAME}_authentication
+    stdin_open: true
+    env_file:
+      - .env
+    ports:
+      - ${AUTHENTICATION_PORT}:3000
+    build:
+      context: authentication
+      dockerfile: Dockerfile
+    volumes:
+      - "./authentication:/authentication"
+
   mailpit:
     container_name: ${APP_NAME}_mailpit
     image: axllent/mailpit

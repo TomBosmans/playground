@@ -1,0 +1,1 @@
+DELETE {{BACKEND_URL}}:{{BACKEND_PORT}}/sign_out
