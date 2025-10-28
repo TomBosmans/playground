@@ -63,6 +63,27 @@ services:
     volumes:
       - "./object-storage:/object-storage"
 
+  job-queue:
+    container_name: ${APP_NAME}_job-queue
+    stdin_open: true
+    env_file:
+      - .env
+    build:
+      context: job-queue
+      dockerfile: Dockerfile
+    volumes:
+      - "./job-queue:/job-queue"
+
+  postgres:
+    container_name: ${APP_NAME}_postgres
+    image: postgres:18-alpine
+    env_file:
+      - .env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
   minio:
     container_name: ${APP_NAME}_minio
     image: minio/minio:RELEASE.2024-12-18T13-15-44Z
@@ -83,4 +104,5 @@ services:
       - "${MAILPIT_SMTP_PORT}:1025"
 
 volumes:
+  postgres:
   minio:

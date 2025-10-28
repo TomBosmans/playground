@@ -33,3 +33,6 @@ shell:
 
 browse:
 	firefox http://localhost:$($(shell echo ${service}_PORT | tr '[:lower:]' '[:upper:]'))
+
+psql:
+	@docker compose exec postgres sh -c "su - postgres -c 'psql $(db)'"
