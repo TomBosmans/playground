@@ -74,6 +74,19 @@ services:
     volumes:
       - "./job-queue:/job-queue"
 
+  typed-routes:
+    container_name: ${APP_NAME}_typed-routes
+    stdin_open: true
+    env_file:
+      - .env
+    build:
+      context: typed-routes
+      dockerfile: Dockerfile
+    ports:
+      - ${TYPED_ROUTES_PORT}:3000
+    volumes:
+      - "./typed-routes:/typed-routes"
+
   postgres:
     container_name: ${APP_NAME}_postgres
     image: postgres:18-alpine
