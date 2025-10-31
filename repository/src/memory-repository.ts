@@ -1,26 +1,30 @@
 import sift from "sift"
+import type Repository from "./repository.ts"
 import type {
   CountQueryParams,
-  DataSet,
   DeleteQueryParams,
   InsertQueryParams,
   SelectQueryParams,
   UpdateQueryParams,
-} from "#types.ts"
-import type Repository from "./repository.ts"
+} from "./types.ts"
 
-export default class MemoryRepository<DB extends DataSet, TableName extends keyof DB>
-  implements Repository<DB, TableName>
+type Obj = Record<string, unknown>
+
+export default class MemoryRepository<
+  Entity extends Obj,
+  NewEntityDTO extends Obj,
+  UpdateEntityDTO extends Obj,
+> implements Repository<Entity, NewEntityDTO, UpdateEntityDTO>
 {
-  private storage: Array<DB[TableName]> = []
+  protected storage: Entity[] = []
 
-  findMany({ where, limit, offset, orderBy }: SelectQueryParams<DB, TableName> = {}) {
+  public findMany({ where, limit, offset, orderBy }: SelectQueryParams<Entity> = {}) {
     let result = this.storage
 
     // biome-ignore lint/suspicious/noExplicitAny: It is ok
     if (where) result = result.filter(sift.default(where as any))
     if (orderBy) {
-      const keys = Object.keys(orderBy) as (keyof DB[TableName])[]
+      const keys = Object.keys(orderBy) as (keyof Entity)[]
       result = [...result].sort((a, b) => {
         for (const key of keys) {
           const direction = orderBy[key]
@@ -36,32 +40,34 @@ export default class MemoryRepository<DB extends DataSet, TableName extends keyo
     return result
   }
 
-  findOne(params: SelectQueryParams<DB, TableName>) {
-    return this.findMany(params)[0]
+  public findOne(params: SelectQueryParams<Entity>) {
+    return this.findMany(params)[0] || null
   }
 
-  findOneOrThrow(params: SelectQueryParams<DB, TableName>) {
+  public findOneOrThrow(params: SelectQueryParams<Entity>) {
     const record = this.findMany(params)[0]
     if (record) return record
 
-    throw Error("Record not found")
+    throw new Error("Record not found")
   }
 
-  count(params: CountQueryParams<DB, TableName>) {
+  public count(params: CountQueryParams<Entity>) {
     // biome-ignore lint/suspicious/noExplicitAny: It is ok
     return this.storage.filter(sift.default(params.where as any)).length
   }
 
-  createOne(newRecord: InsertQueryParams<DB, TableName>) {
-    this.storage.push(newRecord)
-    return newRecord
+  public createOne(newRecord: InsertQueryParams<NewEntityDTO>) {
+    const record = this.generatedAttributes(newRecord)
+    this.storage.push(record)
+    return record
   }
-  createMany(newRecords: Array<InsertQueryParams<DB, TableName>>) {
-    this.storage.push(...newRecords)
-    return newRecords
+  public createMany(newRecords: Array<InsertQueryParams<NewEntityDTO>>) {
+    const records = newRecords.map((newRecord) => this.generatedAttributes(newRecord))
+    this.storage.push(...records)
+    return records
   }
-  update(params: UpdateQueryParams<DB, TableName>) {
-    const updatedRecords: Array<DB[TableName]> = []
+  public update(params: UpdateQueryParams<Entity, UpdateEntityDTO>) {
+    const updatedRecords: Entity[] = []
     this.storage.forEach((record, index) => {
       if (sift.default(params)(record)) {
         this.storage[index] = { ...this.storage[index], ...params.set }
@@ -72,11 +78,15 @@ export default class MemoryRepository<DB extends DataSet, TableName extends keyo
     return updatedRecords
   }
 
-  delete(params: DeleteQueryParams<DB, TableName>) {
+  public delete(params: DeleteQueryParams<Entity>) {
     for (let index = this.storage.length - 1; index >= 0; index--) {
       if (sift.default(params)(this.storage[index])) {
         this.storage.splice(index, 1)
       }
     }
+  }
+
+  protected generatedAttributes(_newEntityDTO: NewEntityDTO): Entity {
+    throw Error("this is not implemented")
   }
 }

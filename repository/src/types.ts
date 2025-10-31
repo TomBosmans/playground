@@ -1,44 +1,41 @@
-export type DataSet = Record<string, Record<string, unknown>>
-export type Select<DB extends DataSet, Table extends keyof DB> = Array<keyof DB[Table]>
+export type Obj = Record<string, unknown>
 
-export type OrderBy<DB extends DataSet, TableName extends keyof DB> = Partial<
-  Record<keyof DB[TableName], "asc" | "desc">
->
+export type OrderBy<Entity extends Obj> = Partial<Record<keyof Entity, "asc" | "desc">>
 
-export type Where<DB extends DataSet, TableName extends keyof DB> = Partial<{
-  [Key in keyof DB[TableName]]:
+export type Where<Entity extends Obj> = Partial<{
+  [Key in keyof Entity]:
     | {
-        $match?: DB[TableName][Key]
-        $eq?: DB[TableName][Key] | null
-        $ne?: DB[TableName][Key] | null
-        $lt?: DB[TableName][Key] | null
-        $lte?: DB[TableName][Key] | null
-        $gt?: DB[TableName][Key] | null
-        $gte?: DB[TableName][Key] | null
-        $in?: Array<DB[TableName][Key]>
-        $nin?: Array<DB[TableName][Key]>
+        $match?: Entity[Key]
+        $eq?: Entity[Key] | null
+        $ne?: Entity | null
+        $lt?: Entity[Key] | null
+        $lte?: Entity[Key] | null
+        $gt?: Entity[Key] | null
+        $gte?: Entity[Key] | null
+        $in?: Array<Entity[Key]>
+        $nin?: Array<Entity[Key]>
       }
-    | DB[TableName][Key]
+    | Entity[Key]
     | null
 }>
 
-export type SelectQueryParams<DB extends DataSet, TableName extends keyof DB> = {
-  orderBy?: OrderBy<DB, TableName>
-  where?: Where<DB, TableName>
+export type SelectQueryParams<Entity extends Obj> = {
+  orderBy?: OrderBy<Entity>
+  where?: Where<Entity>
   limit?: number
   offset?: number
 }
 
-export type CountQueryParams<DB extends DataSet, TableName extends keyof DB> = {
-  where?: Where<DB, TableName>
+export type CountQueryParams<Entity extends Obj> = {
+  where?: Where<Entity>
 }
 
-export type InsertQueryParams<DB extends DataSet, TableName extends keyof DB> = DB[TableName]
+export type InsertQueryParams<NewEntityDTO extends Obj> = NewEntityDTO
 
-export type UpdateQueryParams<DB extends DataSet, TableName extends keyof DB> = {
-  where: Where<DB, TableName>
-  set: Partial<DB[TableName]>
+export type UpdateQueryParams<Entity extends Obj, UpdateEntityDTO extends Obj> = {
+  where: Where<Entity>
+  set: UpdateEntityDTO
 }
-export type DeleteQueryParams<DB extends DataSet, TableName extends keyof DB> = {
-  where: SelectQueryParams<DB, TableName>
+export type DeleteQueryParams<Entity extends Obj> = {
+  where: Where<Entity>
 }

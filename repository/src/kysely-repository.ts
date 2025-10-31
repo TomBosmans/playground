@@ -1,4 +1,4 @@
-import type { Kysely } from "kysely"
+import type { Insertable, Kysely, Selectable, Updateable } from "kysely"
 import type DB from "#db.type.ts"
 import countQuery from "#kysely/queries/count.query.ts"
 import deleteQuery, { type DeleteQueryParams } from "#kysely/queries/delete.query.ts"
@@ -8,40 +8,45 @@ import insertQuery, {
 } from "#kysely/queries/insert.query.ts"
 import selectQuery, { type SelectQueryParams } from "#kysely/queries/select.query.ts"
 import updateQuery, { type UpdateQueryParams } from "#kysely/queries/update.query.ts"
+import type Repository from "./repository.ts"
 
 export default function createKyselyRepository<Table extends keyof DB>(table: Table) {
-  return class KyselyRepository {
+  type Entity = Selectable<DB[Table]>
+  type NewEntityDTO = Insertable<DB[Table]>
+  type UpdateEntityDTO = Updateable<DB[Table]>
+
+  return class KyselyRepository implements Repository<Entity, NewEntityDTO, UpdateEntityDTO> {
     private readonly db: Kysely<DB>
 
     constructor(db: Kysely<DB>) {
       this.db = db
     }
 
-    async findMany(params: SelectQueryParams<Table> = {}) {
-      const query = selectQuery(table, params, this.db)
+    async findMany(params = {}) {
+      const query = selectQuery(table, params as SelectQueryParams<Table>, this.db)
       const records = await query.execute()
-      return records
+      return records as Entity[]
     }
 
-    async findOne(params: SelectQueryParams<Table>) {
-      const record = (await selectQuery<Table>(table, params, this.db).executeTakeFirst()) ?? null
-      return record
+    async findOne(params: unknown) {
+      const record = (await selectQuery(table, params as SelectQueryParams<Table>, this.db).executeTakeFirst()) ?? null
+      return record as Entity
     }
 
-    async findOneOrThrow(params: SelectQueryParams<Table>) {
-      const record = await selectQuery<Table>(table, params, this.db).executeTakeFirst()
-      if (record) return record
+    async findOneOrThrow(params: unknown) {
+      const record = await selectQuery(table, params as SelectQueryParams<Table>, this.db).executeTakeFirst()
+      if (record) return record as Entity
 
       throw new Error("Record not found")
     }
 
-    async count(params: Pick<SelectQueryParams<Table>, "where">) {
-      const query = countQuery(selectQuery(table, params, this.db))
+    async count(params: unknown) {
+      const query = countQuery(selectQuery(table, params as Pick<SelectQueryParams<Table>, "where">, this.db))
       const records = await query.executeTakeFirst()
-      return records?.count
+      return records?.count || 0
     }
 
-    public async create(params: InsertOneQueryParams<Table>) {
+    public async createOne(params: InsertOneQueryParams<Table>) {
       try {
         const [record] = await insertQuery(table, params, this.db).execute()
         return record
@@ -59,17 +64,17 @@ export default function createKyselyRepository<Table extends keyof DB>(table: Ta
       }
     }
 
-    public async update(params: UpdateQueryParams<Table>) {
+    public async update(params: unknown) {
       try {
-        const records = await updateQuery(table, params, this.db).execute()
-        return records
+        const records = await updateQuery(table, params as UpdateQueryParams<Table>, this.db).execute()
+        return records as Entity[]
       } catch (error) {
         this.handleError(error)
       }
     }
 
-    public async delete(params: DeleteQueryParams<Table>) {
-      await deleteQuery(table, params, this.db).execute()
+    public async delete(params: unknown) {
+      await deleteQuery(table, params as DeleteQueryParams<Table>, this.db).execute()
     }
 
     private handleError(error: unknown): never {
