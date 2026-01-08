@@ -87,6 +87,16 @@ services:
     volumes:
       - "./typed-routes:/typed-routes"
 
+  dry-ruby:
+    container_name: ${APP_NAME}_dry-ruby
+    env_file:
+      - .env
+    build:
+      context: dry-ruby
+      dockerfile: Dockerfile
+    volumes:
+      - "./dry-ruby:/dry-ruby"
+
   postgres:
     container_name: ${APP_NAME}_postgres
     image: postgres:18-alpine
