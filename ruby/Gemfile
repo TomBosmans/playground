@@ -4,3 +4,4 @@ source "https://rubygems.org"
 gem 'dry-initializer'
 gem "dry-schema"
 gem 'dry-struct'
+gem 'httparty'

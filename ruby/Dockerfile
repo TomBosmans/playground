@@ -1,3 +1,3 @@
 FROM ruby:4.0
-WORKDIR /dry-ruby
+WORKDIR /ruby
 RUN gem install bundler
